@@ -10,7 +10,6 @@ import org.springframework.stereotype.Repository;
  * @Date 2018-03-25
  * @Time 22:04
  */
-@Repository
 public interface UserMapper {
     String getPassword(String username);
 }
