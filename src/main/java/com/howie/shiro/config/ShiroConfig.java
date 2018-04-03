@@ -1,14 +1,12 @@
 package com.howie.shiro.config;
 
 import com.howie.shiro.shiro.CustomRealm;
+import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
-import org.apache.shiro.web.filter.authc.LogoutFilter;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.apache.shiro.mgt.SecurityManager;
 
-import javax.servlet.Filter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -33,27 +31,32 @@ public class ShiroConfig {
      * 3、部分过滤器可指定参数，如 perms，roles
      */
     @Bean
-    public ShiroFilterFactoryBean shirFilter() {
+    public ShiroFilterFactoryBean shirFilter(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
-        shiroFilterFactoryBean.setSecurityManager(securityManager());
-
-        Map<String, Filter> filters = new LinkedHashMap<>();
-        LogoutFilter logoutFilter = new LogoutFilter();
-        logoutFilter.setRedirectUrl("/login");
-//        filters.put("logout",null);
-        shiroFilterFactoryBean.setFilters(filters);
-
-        Map<String, String> filterChainDefinitionManager = new LinkedHashMap<>();
-        filterChainDefinitionManager.put("/logout", "logout");
-        filterChainDefinitionManager.put("/user/**", "authc,roles[ROLE_USER]");
-        filterChainDefinitionManager.put("/events/**", "authc,roles[ROLE_ADMIN]");
-//        filterChainDefinitionManager.put("/user/edit/**", "authc,perms[user:edit]");// 这里为了测试，固定写死的值，也可以从数据库或其他配置中读取
-        filterChainDefinitionManager.put("/**", "anon");
-        shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionManager);
-
-
-        shiroFilterFactoryBean.setSuccessUrl("/");
+        // 必须设置 SecurityManager
+        shiroFilterFactoryBean.setSecurityManager(securityManager);
+        // 如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
+        shiroFilterFactoryBean.setLoginUrl("/login");
+        // 登录成功后要跳转的链接
+        shiroFilterFactoryBean.setSuccessUrl("/index");
+        // 未授权界面;
         shiroFilterFactoryBean.setUnauthorizedUrl("/403");
+        // 拦截器
+        Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
+        // 配置不会被拦截的链接 顺序判断
+        filterChainDefinitionMap.put("/static/**", "anon");
+        filterChainDefinitionMap.put("/ajaxLogin", "anon");
+
+        // 配置退出过滤器,其中的具体的退出代码Shiro已经替我们实现了
+        filterChainDefinitionMap.put("/logout", "logout");
+        filterChainDefinitionMap.put("/add", "perms[权限添加]");
+
+        // <!-- 过滤链定义，从上向下顺序执行，一般将 /**放在最为下边 -->:这是一个坑呢，一不小心代码就不好使了;
+        // <!-- authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问-->
+//        filterChainDefinitionMap.put("/**", "authc");
+
+        shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
+        System.out.println("Shiro拦截器工厂类注入成功");
         return shiroFilterFactoryBean;
     }
 
@@ -61,7 +64,16 @@ public class ShiroConfig {
     public SecurityManager securityManager() {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         // 设置realm.
-        securityManager.setRealm(new CustomRealm());
+        securityManager.setRealm(customRealm());
         return securityManager;
+    }
+
+    /**
+     * 身份认证realm; (这个需要自己写，账号密码校验；权限等)
+     */
+    @Bean
+    public CustomRealm customRealm() {
+        CustomRealm customRealm = new CustomRealm();
+        return customRealm;
     }
 }

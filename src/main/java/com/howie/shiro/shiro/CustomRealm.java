@@ -2,10 +2,7 @@ package com.howie.shiro.shiro;
 
 import com.howie.shiro.mapper.UserMapper;
 import org.apache.shiro.SecurityUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -15,8 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA
@@ -26,9 +22,14 @@ import java.util.Set;
  * @Date 2018-03-25
  * @Time 21:46
  */
+@Component
 public class CustomRealm extends AuthorizingRealm {
+    private static UserMapper userMapper;
+
     @Autowired
-    private UserMapper userMapper;
+    private void setUserMapper(UserMapper userMapper) {
+        CustomRealm.userMapper = userMapper;
+    }
 
     /**
      * 获取身份验证信息
@@ -39,14 +40,26 @@ public class CustomRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        // 第一步从 token 中取出身份信息
-        String username = (String) authenticationToken.getPrincipal();
-        // 第二步：根据用户输入的userCode从数据库查询,如果查询不到返回null
-        String password = userMapper.getPassword(username);
-        // 如果查询到返回认证信息AuthenticationInfo
-        SimpleAuthenticationInfo simpleAuthenticationInfo = new SimpleAuthenticationInfo(
-                username, password, this.getName());
-        return simpleAuthenticationInfo;
+        System.out.println("身份认证方法：MyShiroRealm.doGetAuthenticationInfo()");
+        UsernamePasswordToken token = (UsernamePasswordToken) authenticationToken;
+        // 从数据库获取对应用户名密码的用户
+        String password = userMapper.getPassword(token.getUsername());
+        if (null == password) {
+            throw new AccountException("用户名不正确");
+        } else if (!password.equals(new String((char[]) token.getCredentials()))) {
+            throw new AccountException("密码不正确");
+        }
+//        else if(user.getStatus()==0){
+//            /**
+//             * 如果用户的status为禁用。那么就抛出<code>DisabledAccountException</code>
+//             */
+//            throw new DisabledAccountException("帐号已经禁止登录！");
+//        }else{
+//            //更新登录时间 last login time
+//            user.setLastLoginTime(new Date());
+//            sysUserService.updateById(user);
+//        }
+        return new SimpleAuthenticationInfo(token.getPrincipal(), password, getName());
     }
 
     /**
@@ -57,32 +70,6 @@ public class CustomRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-//        System.out.println("权限认证方法：MyShiroRealm.doGetAuthenticationInfo()");
-//        SysUser token = (SysUser) SecurityUtils.getSubject().getPrincipal();
-//        String userId = token.getId();
-//        SimpleAuthorizationInfo info =  new SimpleAuthorizationInfo();
-//        //根据用户ID查询角色（role），放入到Authorization里。
-//        /*Map<String, Object> map = new HashMap<String, Object>();
-//        map.put("user_id", userId);
-//        List<SysRole> roleList = sysRoleService.selectByMap(map);
-//        Set<String> roleSet = new HashSet<String>();
-//        for(SysRole role : roleList){
-//            roleSet.add(role.getType());
-//        }*/
-//        //实际开发，当前登录用户的角色和权限信息是从数据库来获取的，我这里写死是为了方便测试
-//        Set<String> roleSet = new HashSet<>();
-//        roleSet.add("100002");
-//        info.setRoles(roleSet);
-//        //根据用户ID查询权限（permission），放入到Authorization里。
-//        /*List<SysPermission> permissionList = sysPermissionService.selectByMap(map);
-//        Set<String> permissionSet = new HashSet<String>();
-//        for(SysPermission Permission : permissionList){
-//            permissionSet.add(Permission.getName());
-//        }*/
-//        Set<String> permissionSet = new HashSet<String>();
-//        permissionSet.add("权限添加");
-//        info.setStringPermissions(permissionSet);
-//        return info;
         return null;
     }
 }
