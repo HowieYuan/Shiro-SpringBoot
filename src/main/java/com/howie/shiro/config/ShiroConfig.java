@@ -21,46 +21,51 @@ import java.util.Map;
 @Configuration
 public class ShiroConfig {
     /**
-     * ShiroFilterFactoryBean 处理拦截资源文件问题。
-     * 注意：单独一个 ShiroFilterFactoryBean 配置是或报错的，
-     * 因为在初始化 ShiroFilterFactoryBean 的时候需要注入 SecurityManager
+     * 过滤器默认权限表 {anon=anon, authc=authc, authcBasic=authcBasic, logout=logout,
+     * noSessionCreation=noSessionCreation, perms=perms, port=port,
+     * rest=rest, roles=roles, ssl=ssl, user=user}
      * <p>
-     * Filter Chain 定义说明
-     * 1、一个 URL 可以配置多个 Filter ，使用逗号分隔
-     * 2、当设置多个过滤器时，全部验证通过，才视为通过
-     * 3、部分过滤器可指定参数，如 perms，roles
+     * anon, authc, authcBasic, user 是第一组认证过滤器
+     * perms, port, rest, roles, ssl 是第二组授权过滤器
+     * <p>
+     * user 和 authc 的不同：当应用开启了rememberMe时, 用户下次访问时可以是一个user, 但绝不会是authc,
+     * 因为authc是需要重新认证的, user表示用户不一定已通过认证, 只要曾被Shiro记住过登录状态的用户就可以正常发起请求,比如rememberMe
+     * 以前的一个用户登录时开启了rememberMe, 然后他关闭浏览器, 下次再访问时他就是一个user, 而不会authc
+     *
+     * @param securityManager 初始化 ShiroFilterFactoryBean 的时候需要注入 SecurityManager
      */
     @Bean
     public ShiroFilterFactoryBean shirFilter(SecurityManager securityManager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         // 必须设置 SecurityManager
         shiroFilterFactoryBean.setSecurityManager(securityManager);
-        // 如果不设置默认会自动寻找Web工程根目录下的"/login.jsp"页面
-        shiroFilterFactoryBean.setLoginUrl("/login");
-        // 登录成功后要跳转的链接
-        shiroFilterFactoryBean.setSuccessUrl("/index");
-        // 未授权界面;
-        shiroFilterFactoryBean.setUnauthorizedUrl("/403");
-        // 拦截器
+        // setLoginUrl 如果不设置值，默认会自动寻找Web工程根目录下的"/login.jsp"页面 或 "/login" 映射
+        shiroFilterFactoryBean.setLoginUrl("/notLogin");
+        // 设置无权限时跳转的 url;
+        shiroFilterFactoryBean.setUnauthorizedUrl("/notRole");
+
+        // 设置拦截器
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
-        // 配置不会被拦截的链接 顺序判断
-        filterChainDefinitionMap.put("/static/**", "anon");
-        filterChainDefinitionMap.put("/ajaxLogin", "anon");
+        //游客，开发权限
+        filterChainDefinitionMap.put("/guest/**", "anon");
+        //用户，需要角色权限 “user”
+        filterChainDefinitionMap.put("/user/**", "roles[user]");
+        //管理员，需要角色权限 “admin”
+        filterChainDefinitionMap.put("/admin/**", "roles[admin]");
+        //开放登陆接口
+        filterChainDefinitionMap.put("/login", "anon");
+        //其余接口一律拦截
+        //主要这行代码必须放在所有权限设置的最后，不然会导致所有 url 都被拦截
+        filterChainDefinitionMap.put("/**", "authc");
 
-        // 配置退出过滤器,其中的具体的退出代码Shiro已经替我们实现了
-        filterChainDefinitionMap.put("/logout", "logout");
-        filterChainDefinitionMap.put("/add", "perms[权限添加]");
-
-        // <!-- 过滤链定义，从上向下顺序执行，一般将 /**放在最为下边 -->:这是一个坑呢，一不小心代码就不好使了;
-        // <!-- authc:所有url都必须认证通过才可以访问; anon:所有url都都可以匿名访问-->
-//        filterChainDefinitionMap.put("/**", "authc");
-
-        
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
         System.out.println("Shiro拦截器工厂类注入成功");
         return shiroFilterFactoryBean;
     }
 
+    /**
+     * 注入 securityManager
+     */
     @Bean
     public SecurityManager securityManager() {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
@@ -70,11 +75,13 @@ public class ShiroConfig {
     }
 
     /**
-     * 身份认证realm; (这个需要自己写，账号密码校验；权限等)
+     * 自定义身份认证 realm;
+     * <p>
+     * 必须写这个类，并加上 @Bean 注解，目的是注入 CustomRealm，
+     * 否则会影响 CustomRealm类 中其他类的依赖注入
      */
     @Bean
     public CustomRealm customRealm() {
-        CustomRealm customRealm = new CustomRealm();
-        return customRealm;
+        return new CustomRealm();
     }
 }

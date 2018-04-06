@@ -6,4 +6,10 @@
         FROM user
         WHERE username = #{username}
     </select>
+
+    <select id="getRole" parameterType="String" resultType="String">
+        SELECT role
+        FROM user
+        WHERE username = #{username}
+    </select>
 </mapper>

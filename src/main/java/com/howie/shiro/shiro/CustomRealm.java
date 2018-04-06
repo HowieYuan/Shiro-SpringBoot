@@ -8,11 +8,9 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created with IntelliJ IDEA
@@ -22,13 +20,12 @@ import java.util.*;
  * @Date 2018-03-25
  * @Time 21:46
  */
-@Component
 public class CustomRealm extends AuthorizingRealm {
-    private static UserMapper userMapper;
+    private UserMapper userMapper;
 
     @Autowired
     private void setUserMapper(UserMapper userMapper) {
-        CustomRealm.userMapper = userMapper;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -49,16 +46,6 @@ public class CustomRealm extends AuthorizingRealm {
         } else if (!password.equals(new String((char[]) token.getCredentials()))) {
             throw new AccountException("密码不正确");
         }
-//        else if(user.getStatus()==0){
-//            /**
-//             * 如果用户的status为禁用。那么就抛出<code>DisabledAccountException</code>
-//             */
-//            throw new DisabledAccountException("帐号已经禁止登录！");
-//        }else{
-//            //更新登录时间 last login time
-//            user.setLastLoginTime(new Date());
-//            sysUserService.updateById(user);
-//        }
         return new SimpleAuthenticationInfo(token.getPrincipal(), password, getName());
     }
 
@@ -70,6 +57,15 @@ public class CustomRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        return null;
+        System.out.println("权限认证方法：MyShiroRealm.doGetAuthentizationInfo()");
+        String username = (String) SecurityUtils.getSubject().getPrincipal();
+        SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
+        //获得该用户角色
+        String role = userMapper.getRole(username);
+        Set<String> set = new HashSet<>();
+        //需要将 role 封装到 Set 作为 info.setRoles() 的参数
+        set.add(role);
+        info.setRoles(set);
+        return info;
     }
 }
