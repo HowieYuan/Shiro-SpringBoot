@@ -70,5 +70,4 @@ public class LoginController {
         }
         return resultMap.fail().message("权限错误！");
     }
-    
 }
