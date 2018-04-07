@@ -37,7 +37,7 @@ public class CustomRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
-        System.out.println("身份认证方法：MyShiroRealm.doGetAuthenticationInfo()");
+        System.out.println("————身份认证方法————");
         UsernamePasswordToken token = (UsernamePasswordToken) authenticationToken;
         // 从数据库获取对应用户名密码的用户
         String password = userMapper.getPassword(token.getUsername());
@@ -57,7 +57,7 @@ public class CustomRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthorizationInfo doGetAuthorizationInfo(PrincipalCollection principalCollection) {
-        System.out.println("权限认证方法：MyShiroRealm.doGetAuthentizationInfo()");
+        System.out.println("————权限认证————");
         String username = (String) SecurityUtils.getSubject().getPrincipal();
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
         //获得该用户角色
@@ -65,6 +65,7 @@ public class CustomRealm extends AuthorizingRealm {
         Set<String> set = new HashSet<>();
         //需要将 role 封装到 Set 作为 info.setRoles() 的参数
         set.add(role);
+        //设置该用户拥有的角色
         info.setRoles(set);
         return info;
     }

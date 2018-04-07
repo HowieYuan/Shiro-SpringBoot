@@ -39,6 +39,13 @@ public class LoginController {
         return resultMap.success().message("您没有权限！");
     }
 
+    @RequestMapping(value = "/logout", method = RequestMethod.GET)
+    public ResultMap logout() {
+        Subject subject = SecurityUtils.getSubject();
+        subject.logout();
+        return resultMap.success().message("成功注销！");
+    }
+
     /**
      * 登陆
      *
@@ -60,8 +67,8 @@ public class LoginController {
         }
         if ("admin".equals(role)) {
             return resultMap.success().message("欢迎来到管理员页面");
-        } else {
-            return resultMap.fail().message("权限错误！");
         }
+        return resultMap.fail().message("权限错误！");
     }
+    
 }
