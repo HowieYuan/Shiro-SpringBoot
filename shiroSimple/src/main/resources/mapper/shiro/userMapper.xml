@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.howie.shiro.mapper.UserMapper">
+    <select id="getPassword" parameterType="String" resultType="String">
+        SELECT password
+        FROM user
+        WHERE username = #{username}
+    </select>
+
+    <select id="getRole" parameterType="String" resultType="String">
+        SELECT role
+        FROM user
+        WHERE username = #{username}
+    </select>
+</mapper>
