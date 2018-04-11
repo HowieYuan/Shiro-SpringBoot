@@ -33,7 +33,7 @@ public class ExceptionController {
     @ExceptionHandler(ShiroException.class)
     public ResultMap handle401(ShiroException e) {
         System.out.println(1);
-        return resultMap.fail().code(401).message(e.getMessage());
+        return resultMap.fail().code(401).message(e.getMessage() + "  CustomRealm");
     }
 
     // 捕捉UnauthorizedException
