@@ -2,7 +2,6 @@ package com.howie.shirojwt.shiro;
 
 import com.howie.shirojwt.mapper.UserMapper;
 import com.howie.shirojwt.util.JWTUtil;
-import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -10,12 +9,10 @@ import org.apache.shiro.authc.SimpleAuthenticationInfo;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
-import org.apache.shiro.realm.Realm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,7 +34,7 @@ public class CustomRealm extends AuthorizingRealm {
     }
 
     /**
-     * 必须重写此方法，不然Shiro会报错
+     * 必须重写此方法，不然会报错
      */
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -53,17 +50,16 @@ public class CustomRealm extends AuthorizingRealm {
         String token = (String) authenticationToken.getCredentials();
         // 解密获得username，用于和数据库进行对比
         String username = JWTUtil.getUsername(token);
-        System.out.println(token);
-        System.out.println(username);
-        if (username == null) {
-            throw new AuthenticationException("token invalid");
+        if (username == null || !JWTUtil.verify(token, username)) {
+            throw new AuthenticationException("token认证失败！");
         }
         String password = userMapper.getPassword(username);
         if (password == null) {
-            throw new AuthenticationException("User didn't existed!");
+            throw new AuthenticationException("该用户不存在！");
         }
-        if (! JWTUtil.verify(token, username, password)) {
-            throw new AuthenticationException("password error");
+        int ban = userMapper.checkUserBanStatus(username);
+        if (ban == 1) {
+            throw new AuthenticationException("该用户已被封号！");
         }
         return new SimpleAuthenticationInfo(token, token, "MyRealm");
     }

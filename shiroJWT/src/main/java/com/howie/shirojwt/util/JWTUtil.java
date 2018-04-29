@@ -18,20 +18,20 @@ import java.util.Date;
  * @Time 22:48
  */
 public class JWTUtil {
-    // 过期时间5分钟
-    private static final long EXPIRE_TIME = 5 * 60 * 1000;
+    // 过期时间24小时
+    private static final long EXPIRE_TIME = 60 * 24 * 60 * 1000;
+    private static final String SECRET = "SHIRO+JWT";
 
     /**
      * 生成 token, 5min后过期
      *
      * @param username 用户名
-     * @param password 用户的密码
      * @return 加密的token
      */
-    public static String createToken(String username, String password) {
+    public static String createToken(String username) {
         try {
             Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
-            Algorithm algorithm = Algorithm.HMAC256(password);
+            Algorithm algorithm = Algorithm.HMAC256(SECRET);
             // 附带username信息
             return JWT.create()
                     .withClaim("username", username)
@@ -49,12 +49,11 @@ public class JWTUtil {
      *
      * @param token    密钥
      * @param username 用户名
-     * @param password 用户的密码
      * @return 是否正确
      */
-    public static boolean verify(String token, String username, String password) {
+    public static boolean verify(String token, String username) {
         try {
-            Algorithm algorithm = Algorithm.HMAC256(password);
+            Algorithm algorithm = Algorithm.HMAC256(SECRET);
             //在token中附带了username信息
             JWTVerifier verifier = JWT.require(algorithm)
                     .withClaim("username", username)

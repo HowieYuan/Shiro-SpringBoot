@@ -12,4 +12,27 @@
         FROM user
         WHERE username = #{username}
     </select>
+
+    <update id="updatePassword" parameterType="String">
+        UPDATE user
+        SET password = #{password}
+        WHERE username = #{username}
+    </update>
+
+    <select id="getUser" resultType="String">
+        SELECT username
+        FROM user
+    </select>
+
+    <update id="banUser" parameterType="String">
+        UPDATE user
+        SET ban = 1
+        WHERE username = #{username}
+    </update>
+
+    <select id="checkUserBanStatus" parameterType="String" resultType="int">
+        SELECT ban
+        FROM user
+        WHERE username = #{username}
+    </select>
 </mapper>

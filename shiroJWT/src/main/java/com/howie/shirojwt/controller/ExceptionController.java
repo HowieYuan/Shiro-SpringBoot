@@ -32,29 +32,17 @@ public class ExceptionController {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(ShiroException.class)
     public ResultMap handle401(ShiroException e) {
-        System.out.println(1);
-        return resultMap.fail().code(401).message(e.getMessage() + "  CustomRealm");
-    }
-
-    // 捕捉UnauthorizedException
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResultMap handle401() {
-        System.out.println(2);
-        return resultMap.fail().code(401).message("Unauthorized");
+        return resultMap.fail().code(401).message("您没有权限访问！");
     }
 
     // 捕捉其他所有异常
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResultMap globalException(HttpServletRequest request, Throwable ex) {
-        System.out.println(3);
-        System.out.println(ex.getMessage());
-        return resultMap.fail().code(getStatus(request).value()).message("111");
+        return resultMap.fail().code(getStatus(request).value()).message(" 访问出错，无法访问");
     }
 
     private HttpStatus getStatus(HttpServletRequest request) {
-        System.out.println(4);
         Integer statusCode = (Integer) request.getAttribute("javax.servlet.error.status_code");
         if (statusCode == null) {
             return HttpStatus.INTERNAL_SERVER_ERROR;

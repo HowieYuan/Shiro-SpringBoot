@@ -1,6 +1,9 @@
 package com.howie.shirojwt.mapper;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA
@@ -24,4 +27,18 @@ public interface UserMapper {
      * @return user/admin
      */
     String getRole(String username);
+
+    /**
+     * 修改密码
+     */
+    void updatePassword(@Param("username") String username, @Param("newPassword") String newPassword);
+
+    /**
+     * 获得存在的用户
+     */
+    List<String> getUser();
+
+    void banUser(String username);
+
+    int checkUserBanStatus(String username);
 }
