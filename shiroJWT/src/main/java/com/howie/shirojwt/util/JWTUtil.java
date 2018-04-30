@@ -18,8 +18,9 @@ import java.util.Date;
  * @Time 22:48
  */
 public class JWTUtil {
-    // 过期时间24小时
+    // 过期时间 24 小时
     private static final long EXPIRE_TIME = 60 * 24 * 60 * 1000;
+    // 密钥
     private static final String SECRET = "SHIRO+JWT";
 
     /**

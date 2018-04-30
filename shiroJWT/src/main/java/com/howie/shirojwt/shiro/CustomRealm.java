@@ -20,7 +20,7 @@ import java.util.Set;
  * Created with IntelliJ IDEA
  *
  * @Author yuanhaoyue swithaoy@gmail.com
- * @Description 自定义
+ * @Description 自定义 Realm
  * @Date 2018-04-09
  * @Time 16:58
  */
@@ -74,11 +74,19 @@ public class CustomRealm extends AuthorizingRealm {
         SimpleAuthorizationInfo info = new SimpleAuthorizationInfo();
         //获得该用户角色
         String role = userMapper.getRole(username);
-        Set<String> set = new HashSet<>();
-        //需要将 role 封装到 Set 作为 info.setRoles() 的参数
-        set.add(role);
-        //设置该用户拥有的角色
-        info.setRoles(set);
+        //每个角色拥有默认的权限
+        String rolePermission = userMapper.getRolePermission(username);
+        //每个用户可以设置新的权限
+        String permission = userMapper.getPermission(username);
+        Set<String> roleSet = new HashSet<>();
+        Set<String> permissionSet = new HashSet<>();
+        //需要将 role, permission 封装到 Set 作为 info.setRoles(), info.setStringPermissions() 的参数
+        roleSet.add(role);
+        permissionSet.add(rolePermission);
+        permissionSet.add(permission);
+        //设置该用户拥有的角色和权限
+        info.setRoles(roleSet);
+        info.setStringPermissions(permissionSet);
         return info;
     }
 }

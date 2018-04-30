@@ -35,4 +35,16 @@
         FROM user
         WHERE username = #{username}
     </select>
+
+    <select id="getRolePermission" parameterType="String" resultType="String">
+        SELECT role.permission
+        FROM user, role
+        WHERE username = #{username} AND role.role = user.role
+    </select>
+
+    <select id="getPermission" parameterType="String" resultType="String">
+        SELECT permission
+        FROM user
+        WHERE username = #{username}
+    </select>
 </mapper>

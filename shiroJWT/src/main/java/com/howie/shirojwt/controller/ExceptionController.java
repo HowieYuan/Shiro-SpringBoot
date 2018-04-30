@@ -15,7 +15,7 @@ import javax.servlet.http.HttpServletRequest;
  * Created with IntelliJ IDEA
  *
  * @Author yuanhaoyue swithaoy@gmail.com
- * @Description
+ * @Description 异常处理
  * @Date 2018-04-09
  * @Time 17:09
  */
@@ -29,17 +29,17 @@ public class ExceptionController {
     }
 
     // 捕捉shiro的异常
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(ShiroException.class)
-    public ResultMap handle401(ShiroException e) {
+    public ResultMap handle401() {
         return resultMap.fail().code(401).message("您没有权限访问！");
     }
 
     // 捕捉其他所有异常
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResultMap globalException(HttpServletRequest request, Throwable ex) {
-        return resultMap.fail().code(getStatus(request).value()).message(" 访问出错，无法访问");
+        return resultMap.fail()
+                .code(getStatus(request).value())
+                .message("访问出错，无法访问: " + ex.getMessage());
     }
 
     private HttpStatus getStatus(HttpServletRequest request) {

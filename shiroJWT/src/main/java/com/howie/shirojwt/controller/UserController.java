@@ -3,6 +3,7 @@ package com.howie.shirojwt.controller;
 import com.howie.shirojwt.mapper.UserMapper;
 import com.howie.shirojwt.model.ResultMap;
 import com.howie.shirojwt.util.JWTUtil;
+import org.apache.shiro.authz.annotation.Logical;
 import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.apache.shiro.authz.annotation.RequiresRoles;
@@ -30,14 +31,17 @@ public class UserController {
         this.resultMap = resultMap;
     }
 
+    /**
+     * 拥有 user, admin 角色的用户可以访问下面的页面
+     */
     @GetMapping("/getMessage")
-    @RequiresRoles("user")
+    @RequiresRoles(logical = Logical.OR, value = {"user", "admin"})
     public ResultMap getMessage() {
         return resultMap.success().code(200).message("成功获得信息！");
     }
 
     @PostMapping("/updatePassword")
-    @RequiresRoles("user")
+    @RequiresRoles(logical = Logical.OR, value = {"user", "admin"})
     public ResultMap updatePassword(String username, String oldPassword, String newPassword) {
         String dataBasePassword = userMapper.getPassword(username);
         if (dataBasePassword.equals(oldPassword)) {
@@ -46,5 +50,15 @@ public class UserController {
             return resultMap.fail().message("密码错误！");
         }
         return resultMap.success().code(200).message("成功获得信息！");
+    }
+
+    /**
+     * 拥有 vip 权限可以访问该页面
+     */
+    @GetMapping("/getVipMessage")
+    @RequiresRoles(logical = Logical.OR, value = {"user", "admin"})
+    @RequiresPermissions("vip")
+    public ResultMap getVipMessage() {
+        return resultMap.success().code(200).message("成功获得 vip 信息！");
     }
 }

@@ -6,6 +6,7 @@ import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.servlet.ServletRequest;
@@ -27,7 +28,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     /**
-     * 如果带有 token，则对 token 进行检查，直接通过
+     * 如果带有 token，则对 token 进行检查，否则直接通过
      */
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws UnauthorizedException {
@@ -39,7 +40,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
                 return true;
             } catch (Exception e) {
                 //token 错误
-                response401(response, e.getMessage());
+                responseError(response, e.getMessage());
             }
         }
         //如果请求头不存在 Token，则可能是执行登陆操作或者是游客状态访问，无需检查 token，直接返回 true
@@ -48,7 +49,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 
     /**
      * 判断用户是否想要登入。
-     * 检测header里面是否包含Authorization字段即可
+     * 检测 header 里面是否包含 Token 字段
      */
     @Override
     protected boolean isLoginAttempt(ServletRequest request, ServletResponse response) {
@@ -58,13 +59,12 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     }
 
     /**
-     *
+     * 执行登陆操作
      */
     @Override
     protected boolean executeLogin(ServletRequest request, ServletResponse response) throws Exception {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String token = httpServletRequest.getHeader("Token");
-
         JWTToken jwtToken = new JWTToken(token);
         // 提交给realm进行登入，如果错误他会抛出异常并被捕获
         getSubject(request, response).login(jwtToken);
@@ -91,9 +91,9 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     }
 
     /**
-     * 将非法请求跳转到 /unauthorized
+     * 将非法请求跳转到 /unauthorized/**
      */
-    private void response401(ServletResponse response, String message) {
+    private void responseError(ServletResponse response, String message) {
         try {
             HttpServletResponse httpServletResponse = (HttpServletResponse) response;
             //设置编码，否则中文字符在重定向时会变为空字符串

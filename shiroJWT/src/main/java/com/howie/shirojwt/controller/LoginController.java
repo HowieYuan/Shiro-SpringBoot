@@ -3,6 +3,8 @@ package com.howie.shirojwt.controller;
 import com.howie.shirojwt.mapper.UserMapper;
 import com.howie.shirojwt.model.ResultMap;
 import com.howie.shirojwt.util.JWTUtil;
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
+import org.apache.shiro.authz.annotation.RequiresRoles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
