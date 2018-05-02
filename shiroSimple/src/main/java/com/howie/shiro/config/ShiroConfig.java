@@ -67,21 +67,10 @@ public class ShiroConfig {
      * 注入 securityManager
      */
     @Bean
-    public SecurityManager securityManager() {
+    public SecurityManager securityManager(CustomRealm customRealm) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         // 设置realm.
-        securityManager.setRealm(customRealm());
+        securityManager.setRealm(customRealm);
         return securityManager;
-    }
-
-    /**
-     * 自定义身份认证 realm;
-     * <p>
-     * 必须写这个类，并加上 @Bean 注解，目的是注入 CustomRealm，
-     * 否则会影响 CustomRealm类 中其他类的依赖注入
-     */
-    @Bean
-    public CustomRealm customRealm() {
-        return new CustomRealm();
     }
 }

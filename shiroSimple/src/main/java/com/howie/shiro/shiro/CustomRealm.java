@@ -8,6 +8,7 @@ import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,11 +21,12 @@ import java.util.Set;
  * @Date 2018-03-25
  * @Time 21:46
  */
+@Component
 public class CustomRealm extends AuthorizingRealm {
-    private UserMapper userMapper;
+    private final UserMapper userMapper;
 
     @Autowired
-    private void setUserMapper(UserMapper userMapper) {
+    public CustomRealm(UserMapper userMapper) {
         this.userMapper = userMapper;
     }
 
