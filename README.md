@@ -1,10 +1,10 @@
-# [一. shiro 整合 springBoot 实现基本的角色权限控制](#一)
+# [一. shiro 整合 springBoot 实现基本的角色权限控制](#1)
 https://github.com/HowieYuan/shiro/tree/master/shiroSimple
-# [二. shiro + springBoot 整合 JWT](#二)
+# [二. shiro + springBoot 整合 JWT](#2)
 https://github.com/HowieYuan/shiro/tree/master/shiroJWT
 
-## 依赖包
-<span id="一"></span>
+## <span id="1">依赖包</span>
+
 ```
 <dependency>
 	<groupId>org.apache.shiro</groupId>
@@ -342,8 +342,8 @@ public class LoginController {
 ![注销](https://upload-images.jianshu.io/upload_images/8807674-3fc0b74103c51b2c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ---
-<span id="二"></span>
-## JWTUtil
+
+## <span id="2">JWTUtil</span>
 我们利用 JWT 的工具类来生成我们的 token，这个工具类主要有生成 token 和 校验 token 两个方法
 
 生成 token 时，指定 token 过期时间 ```EXPIRE_TIME``` 和签名密钥 ```SECRET```，然后将 date 和 username 写入 token 中，并使用带有密钥的 HS256 签名算法进行签名
